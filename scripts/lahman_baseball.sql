@@ -14,46 +14,97 @@ ORDER BY game_years DESC;
 --ANSWER: 1871-2016
 
 -- 2. Find the name and height of the shortest player in the database. How many games did he play in? What is the name of the team for which he played?
-SELECT *
-FROM people;
-SELECT*
-FROM appearances;
-
-
-
-SELECT playerid, namegiven, namefirst||' '||namelast AS name, height, teamid
+--The following helped to orient myslef with the tables I was pulling from
+--SELECT *
+-- FROM people;
+-- -- SELECT*
+-- -- FROM appearances;
+-- SELECT *
+-- FROM teams
+--------------------------
+SELECT	p.playerid
+		,p.namegiven
+		,p.namefirst||' '||p.namelast AS play_name
+		,p.height
+		,t.teamid
+		,a.g_all
+		,t.name
 FROM people as p
 LEFT JOIN appearances AS a
 USING (playerid)
-
-WHERE playerid IN (SELECT DISTINCT(teamid), name
-FROM teams
-WHERE teamid= 'SLA')
-
-
---output: gaedeed01	Edward Carl	43
---the above helped to look for shortest player, by ordering height from people table
-
-
-
-
-SELECT *
-FROM appearances
-WHERE playerid='gaedeed01'
-
-SELECT *
-FROM people
-WHERE playerid='gaedeed01'
-
-
-
-
--- 3. Find all players in the database who played at Vanderbilt University. Create a list showing each player’s first and last names as well as the total salary they earned in the major leagues. Sort this list in descending order by the total salary earned. Which Vanderbilt player earned the most money in the majors?
+LEFT JOIN teams AS t
+USING (teamid)
+ORDER BY height ASC
+LIMIT 1;
+-- ANSWER:// given name: Edward Carl// name: Eddie Gaedel// height: 43in// team: St. Louis Browns// played 1 game
+--top query was my first thought processes, 2nd was one where subquery was added in where clause, which caused it to minimize (not by much) the time it took to run the query 
+SELECT p.playerid
+	,p.namegiven
+	,p.namefirst||' '||p.namelast AS player_name
+	,p.height
+	,a.g_all
+	,t.name
+	,t.teamid
+FROM people AS p
+JOIN appearances AS a
+USING (playerid)
+JOIN teams as t
+USING (teamid)
+WHERE height IN
+		(SELECT MIN(height)
+		FROM people)
+LIMIT 1;
+--same result as the 1st query: ANSWER:// given name: Edward Carl// name: Eddie Gaedel// height: 43in// team: St. Louis Browns// played 1 game
 	
+-- 3. Find all players in the database who played at Vanderbilt University. Create a list showing each player’s first and last names as well as the total salary they earned in the major leagues. Sort this list in descending order by the total salary earned. Which Vanderbilt player earned the most money in the majors?
+--The following helped to orient myslef with the tables I was pulling from
+-- SELECT *
+-- FROM people
+-- SELECT *
+-- FROM salaries
+---------------------------------
+
+SELECT p.namefirst||' '||p.namelast AS player_name
+		,SUM(sal.salary) AS total_salary
+--summed the salary columns, because there are players that played for multiple years
+FROM people AS p
+JOIN salaries as sal 
+USING (playerid)
+WHERE playerid IN
+			(SELECT DISTINCT (playerid)
+			 FROM schools
+			 JOIN collegeplaying
+			 USING (schoolid)
+			 WHERE schoolname LIKE '%Vander%')
+--the subquery should filter for players in that played in Vanderbilt Uni.
+GROUP BY p.namefirst
+		,p.namelast
+ORDER BY total_salary DESC;
+
+--ANSWER: 15 players made it to the major leagues. David price had the highest aggregated salary at 81851296, and Scotti Madison the lowest at 135000
+
 
 -- 4. Using the fielding table, group players into three groups based on their position: label players with position OF as "Outfield", those with position "SS", "1B", "2B", and "3B" as "Infield", and those with position "P" or "C" as "Battery". Determine the number of putouts made by each of these three groups in 2016.
+-- SELECT *
+-- FROM fielding
    
+SELECT
+	CASE WHEN pos = 'OF' THEN 'Outfield'
+	WHEN pos IN ('SS','1B','2B','3B') THEN 'Infield'
+	WHEN pos IN ('P','C') THEN 'Battery'
+	END AS position 
+--case statement to put pos into three categories
+	,SUM(po)
+-- SUM to add up each one of the groups
+FROM fielding
+WHERE yearid=2016
+GROUP BY position;
+--group by statement to in a way seperate and group each category
+
+--ANSWER: Battery:	41424// Infield: 58934// Outfield: 29560
+
 -- 5. Find the average number of strikeouts per game by decade since 1920. Round the numbers you report to 2 decimal places. Do the same for home runs per game. Do you see any trends?
+
    
 
 -- 6. Find the player who had the most success stealing bases in 2016, where __success__ is measured as the percentage of stolen base attempts which are successful. (A stolen base attempt results either in a stolen base or being caught stealing.) Consider only players who attempted _at least_ 20 stolen bases.
