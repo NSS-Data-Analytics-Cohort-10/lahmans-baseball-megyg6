@@ -37,7 +37,7 @@ USING (teamid)
 ORDER BY height ASC
 LIMIT 1;
 -- ANSWER:// given name: Edward Carl// name: Eddie Gaedel// height: 43in// team: St. Louis Browns// played 1 game
---top query was my first thought processes, 2nd was one where subquery was added in where clause, which caused it to minimize (not by much) the time it took to run the query 
+--top query was my first thought processes, 2nd was one where subquery was added in where clause, which caused it to minimize (not by much) the time it took to run the query: 
 SELECT p.playerid
 	,p.namegiven
 	,p.namefirst||' '||p.namelast AS player_name
@@ -94,18 +94,27 @@ SELECT
 	WHEN pos IN ('P','C') THEN 'Battery'
 	END AS position 
 --case statement to put pos into three categories
-	,SUM(po)
+	,SUM(po) AS total_putouts
 -- SUM to add up each one of the groups
 FROM fielding
 WHERE yearid=2016
-GROUP BY position;
+--filters to only look at year 2016
+GROUP BY position
+ORDER BY total_putouts DESC;
 --group by statement to in a way seperate and group each category
-
---ANSWER: Battery:	41424// Infield: 58934// Outfield: 29560
+--ANSWER: Infield: 58934// Battery:	41424//  Outfield: 29560
 
 -- 5. Find the average number of strikeouts per game by decade since 1920. Round the numbers you report to 2 decimal places. Do the same for home runs per game. Do you see any trends?
+SELECT *
+FROM teams
 
-   
+SELECT yearid/10*10 AS decade, AVG()/SUM(ghome+)
+FROM teams
+WHERE yearid >= 1920
+GROUP BY decade
+
+
+-- yearid/10*10 AS decade martha contributed this// might use it later
 
 -- 6. Find the player who had the most success stealing bases in 2016, where __success__ is measured as the percentage of stolen base attempts which are successful. (A stolen base attempt results either in a stolen base or being caught stealing.) Consider only players who attempted _at least_ 20 stolen bases.
 	
