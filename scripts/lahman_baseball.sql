@@ -105,22 +105,87 @@ ORDER BY total_putouts DESC;
 --ANSWER: Infield: 58934// Battery:	41424//  Outfield: 29560
 
 -- 5. Find the average number of strikeouts per game by decade since 1920. Round the numbers you report to 2 decimal places. Do the same for home runs per game. Do you see any trends?
-SELECT *
-FROM teams
+--need to find another way to find decade
+CONCAT(LEFT(CAST(yearid AS varchar),3),'0s') AS decade
 
-SELECT yearid/10*10 AS decade, AVG()/SUM(ghome+)
-FROM teams
+SELECT yearid/10*10 AS decade, ROUND(SUM(so)/SUM(g),2) AS avg_strike_out_per_game
+FROM teams								 
 WHERE yearid >= 1920
 GROUP BY decade
+ORDER BY decade;
+--the one above works if i am using float, which is where amanda hinted the question was going
+
+SELECT yearid/10*10 AS decade, ROUND(AVG(so)/AVG(g),2) AS avg_strike_out_per_game
+FROM teams								 
+WHERE yearid >= 1920
+GROUP BY decade
+ORDER BY decade;
+--need to figure out which one is right for strike out 
+--moving on to homeruns which will also need some explaination 
+--casting tpe to numeric..
+--and find a better way to chnage date to decade
+--need to come back
+
+SELECT yearid/10*10 AS decade, ROUND(AVG(hra)/AVG(g),2) AS avg_home_run_per_game
+FROM teams								 
+WHERE yearid >= 1920
+GROUP BY decade
+ORDER BY decade;
+
+SELECT yearid/10*10 AS decade, ROUND(SUM(hra)/SUM(g),2) AS avg_home_run_per_game
+FROM teams								 
+WHERE yearid >= 1920
+GROUP BY decade
+ORDER BY decade;
 
 
--- yearid/10*10 AS decade martha contributed this// might use it later
+SELECT yearid/10*10 AS decade, ROUND(AVG(hra)/SUM(g),2) AS avg_strike_out_per_game
+FROM teams								 
+WHERE yearid >= 1920
+GROUP BY decade
+ORDER BY decade;
+
+--ANSWER: There is a positive trend when focusing on strike outs, and a constant low trend of homeruns
 
 -- 6. Find the player who had the most success stealing bases in 2016, where __success__ is measured as the percentage of stolen base attempts which are successful. (A stolen base attempt results either in a stolen base or being caught stealing.) Consider only players who attempted _at least_ 20 stolen bases.
+
+SELECT *
+FROM people
+SELECT * 
+FROM batting 
+
+
+SELECT DISTINCT(b.playerid), sb AS stolen_bases, sb+cs AS total_steal_attempts, (sb/(sb+cs)) pct_success
+FROM batting AS b
+JOIN people AS p
+USING (playerid)
+WHERE yearid=2016
+GROUP BY b.playerid,b.cs, b.sb
+HAVING SUM(sb)>=20	
+
+--why is the pct not calculating? coming back to this
+	
 	
 
 -- 7.  From 1970 – 2016, what is the largest number of wins for a team that did not win the world series? What is the smallest number of wins for a team that did win the world series? Doing this will probably result in an unusually small number of wins for a world series champion – determine why this is the case. Then redo your query, excluding the problem year. How often from 1970 – 2016 was it the case that a team with the most wins also won the world series? What percentage of the time?
 
+--might use cte to make two table for this question 
+--maybe use partition and rank functions
+
+SELECT teamid, yearid, name, SUM(w) AS wins, wswin
+FROM teams
+WHERE yearid BETWEEN 1970 AND 2016
+	AND wswin='N'
+GROUP BY teamid, name, yearid, wswin
+ORDER BY yearid DESC;
+ 
+
+SELECT teamid, yearid, name, SUM(w) AS wins,wswin
+FROM teams
+WHERE yearid BETWEEN 1970 AND 2016
+	AND wswin='Y'
+GROUP BY teamid, name, yearid,wswin
+ORDER BY wins DESC;
 
 -- 8. Using the attendance figures from the homegames table, find the teams and parks which had the top 5 average attendance per game in 2016 (where average attendance is defined as total attendance divided by number of games). Only consider parks where there were at least 10 games played. Report the park name, team name, and average attendance. Repeat for the lowest 5 average attendance.
 
