@@ -273,7 +273,7 @@ WHERE m_al.playerid=  m_nl.playerid
 -- 10. Find all players who hit their career highest number of home runs in 2016. Consider only players who have played in the league for at least 10 years, and who hit at least one home run in 2016. Report the players' first and last names and the number of home runs they hit in 2016.
 
 
-SELECT playerid 
+WITH home_run_2016 AS(SELECT playerid 
 		,g
 		,hr
 		,teamid
@@ -281,15 +281,19 @@ SELECT playerid
 FROM batting
 WHERE yearid=2016
  		AND hr>=1
-ORDER BY hr DESC
-
-SELECT playerid, namefirst||' '||namelast AS name, namegiven
+ORDER BY hr DESC),
+veteran_players AS (SELECT  playerid
+		,namefirst||' '||namelast AS name
+		,namegiven
+		,DATE_PART('year',finalgame::date)-DATE_PART('year',debut::date) AS years_palying
+		,playerid
 FROM people 
+WHERE DATE_PART('year',finalgame::date)-DATE_PART('year',debut::date) >=10)
 
-
-FROM people 
-
-
+FROM home_run_2016 AS hr
+JOIN 
+ON 
+ 
 
 
 --query shows 2016 playerid, year, teamid,#of games for pitchers that played in 2016 and had at least 1 homerun ordered by desc;
