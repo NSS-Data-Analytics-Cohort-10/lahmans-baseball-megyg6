@@ -273,13 +273,13 @@ LIMIT 5;
 
 -- 9. Which managers have won the TSN Manager of the Year award in both the National League (NL) and the American League (AL)? Give their full name and the teams that they were managing when they won the award.
 
-SELECT *
-FROM awardsmanagers
-WHERE playerid='johnsda02'
+-- SELECT *
+-- FROM awardsmanagers
+-- WHERE playerid='johnsda02'
 
-SELECT *
-FROM awardsmanagers
-WHERE playerid='leylaji99'
+-- SELECT *
+-- FROM awardsmanagers
+-- WHERE playerid='leylaji99'
 
 
 WITH manager_of_year_al AS (SELECT playerid
@@ -323,7 +323,29 @@ ON mal.playerid=pi.playerid
 
 --ANSWER: Davey Johnson: Baltimore Orioles
 --Jim Leyland:Detroit Tigers
-				
+-- 9. Which managers have won the TSN Manager of the Year award in both the National League (NL) and the American League (AL)? Give their full name and the teams that they were managing when they won the award.
+
+--MOB CODING with WIlliam, Brandy, Sullivan, Shaterial, Martha, Selamawit
+SELECT am1.playerid AS al_id, am1.yearid AS al_year, am2.yearid AS nl_year, p.namefirst||' '||p.namelast as manager_name, 						m.yearid as managing_year, m.teamid as team
+FROM awardsmanagers AS am1
+INNER JOIN awardsmanagers AS am2
+		USING (playerid)
+INNER JOIN people AS p
+		USING (playerid)
+INNER JOIN managers AS m
+		USING (playerid)
+WHERE am1.awardid = 'TSN Manager of the Year'
+	AND am2.awardid = 'TSN Manager of the Year'
+		AND ((am1.lgid = 'AL' AND am2.lgid = 'NL') 
+		    OR (am1.lgid = 'NL' AND am2.lgid = 'AL'))
+		AND (m.yearid = am1.yearid)		
+
+
+
+
+
+
+
 -- 10. Find all players who hit their career highest number of home runs in 2016. Consider only players who have played in the league for at least 10 years, and who hit at least one home run in 2016. Report the players' first and last names and the number of home runs they hit in 2016.
 
 
